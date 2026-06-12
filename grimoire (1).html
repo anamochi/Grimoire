@@ -1,0 +1,1265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Grimoire</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --lavender:     #c9bfe8;
+    --lavender-mid: #b8aad8;
+    --lavender-deep:#9b8ec4;
+    --blush:        #f0dde8;
+    --blush-mid:    #e8ccd8;
+    --silver:       #d4d0dc;
+    --silver-light: #ede9f4;
+    --ink:          #3a3248;
+    --ink-soft:     #6b6080;
+    --gold:         #c9b89a;
+    --white:        #faf8fc;
+    --glass:        rgba(255,255,255,0.45);
+    --glass-border: rgba(201,191,232,0.35);
+  }
+
+  body {
+    font-family: 'Jost', sans-serif;
+    background: var(--white);
+    color: var(--ink);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 20% 0%, rgba(201,191,232,0.28) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 100%, rgba(240,221,232,0.32) 0%, transparent 60%),
+      radial-gradient(ellipse at 60% 40%, rgba(212,208,220,0.18) 0%, transparent 50%);
+  }
+
+  /* PASSWORD GATE */
+  #passwordGate {
+    position: fixed; inset: 0;
+    background: var(--white);
+    background-image:
+      radial-gradient(ellipse at 20% 0%, rgba(201,191,232,0.28) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 100%, rgba(240,221,232,0.32) 0%, transparent 60%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 2rem;
+  }
+  #passwordGate.hidden { display: none; }
+  #grimoire { display: none; }
+  #grimoire.visible { display: block; }
+
+  .gate-sigil {
+    font-size: 2.5rem;
+    letter-spacing: 0.4rem;
+    margin-bottom: 1.2rem;
+    opacity: 0.6;
+  }
+  .gate-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem;
+    font-weight: 300;
+    color: var(--ink);
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.08em;
+  }
+  .gate-title em { font-style: italic; color: var(--lavender-deep); }
+  .gate-sub {
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 2.5rem;
+  }
+  .gate-box {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 2rem 2rem;
+    width: 100%;
+    max-width: 340px;
+    text-align: center;
+    backdrop-filter: blur(8px);
+  }
+  .gate-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 0.8rem;
+    display: block;
+  }
+  #passwordInput {
+    text-align: center;
+    letter-spacing: 0.3em;
+    font-size: 1.1rem;
+    font-family: 'Cormorant Garamond', serif;
+    background: rgba(255,255,255,0.7);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    width: 100%;
+    outline: none;
+    margin-bottom: 1.2rem;
+    color: var(--ink);
+    transition: border-color 0.2s;
+  }
+  #passwordInput:focus { border-color: var(--lavender-mid); }
+  #passwordInput.error { border-color: #e8aab8; animation: shake 0.3s ease; }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+  .gate-error {
+    font-size: 0.75rem;
+    color: #b8758a;
+    margin-top: -0.5rem;
+    margin-bottom: 0.8rem;
+    min-height: 1.2rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-style: italic;
+  }
+  .gate-hint {
+    font-size: 0.65rem;
+    color: var(--ink-soft);
+    margin-top: 1rem;
+    letter-spacing: 0.05em;
+    opacity: 0.6;
+  }
+
+  /* HEADER */
+  header {
+    text-align: center;
+    padding: 3rem 1.5rem 1.5rem;
+    position: relative;
+  }
+  .moon-sigil {
+    font-size: 2rem;
+    display: block;
+    margin-bottom: 0.5rem;
+    opacity: 0.7;
+    letter-spacing: 0.3rem;
+  }
+  header h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: clamp(2.2rem, 6vw, 3.4rem);
+    font-weight: 300;
+    letter-spacing: 0.12em;
+    color: var(--ink);
+    line-height: 1.1;
+  }
+  header h1 em {
+    font-style: italic;
+    color: var(--lavender-deep);
+  }
+  .header-sub {
+    font-size: 0.75rem;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-top: 0.6rem;
+    font-weight: 300;
+  }
+
+  /* MOON PHASE BAR */
+  .moon-bar {
+    display: flex;
+    justify-content: center;
+    gap: 0.6rem;
+    margin: 1.5rem auto;
+    flex-wrap: wrap;
+    max-width: 360px;
+  }
+  .moon-phase {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    cursor: pointer;
+    opacity: 0.45;
+    transition: opacity 0.2s;
+  }
+  .moon-phase:hover { opacity: 0.75; }
+  .moon-phase.active { opacity: 1; }
+  .moon-phase .glyph {
+    font-size: 1.3rem;
+    line-height: 1;
+  }
+  .moon-phase .label {
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+
+  /* NAV TABS */
+  nav {
+    display: flex;
+    justify-content: center;
+    gap: 0.4rem;
+    padding: 0 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+  nav button {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 999px;
+    padding: 0.45rem 1.1rem;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    cursor: pointer;
+    transition: all 0.2s;
+    backdrop-filter: blur(6px);
+  }
+  nav button:hover {
+    background: rgba(201,191,232,0.3);
+    color: var(--ink);
+  }
+  nav button.active {
+    background: var(--lavender-mid);
+    border-color: var(--lavender-mid);
+    color: white;
+    font-weight: 500;
+  }
+
+  /* MAIN CONTAINER */
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 1.2rem 4rem;
+  }
+
+  /* SECTIONS */
+  .section { display: none; }
+  .section.visible { display: block; }
+
+  /* CARD */
+  .card {
+    background: var(--glass);
+    border: 1px solid var(--glass-border);
+    border-radius: 18px;
+    padding: 1.6rem;
+    margin-bottom: 1.2rem;
+    backdrop-filter: blur(8px);
+  }
+  .card-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: var(--lavender-deep);
+    margin-bottom: 1rem;
+    letter-spacing: 0.04em;
+  }
+
+  /* INPUT STYLES */
+  textarea, input[type="text"], select {
+    width: 100%;
+    background: rgba(255,255,255,0.6);
+    border: 1px solid var(--glass-border);
+    border-radius: 10px;
+    padding: 0.7rem 0.9rem;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.85rem;
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.2s;
+    resize: vertical;
+  }
+  textarea:focus, input[type="text"]:focus, select:focus {
+    border-color: var(--lavender-mid);
+  }
+  textarea { min-height: 90px; }
+
+  .field-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+    margin-bottom: 0.35rem;
+    display: block;
+  }
+  .field { margin-bottom: 1rem; }
+
+  /* BUTTON */
+  .btn {
+    background: linear-gradient(135deg, var(--lavender-mid), var(--blush-mid));
+    border: none;
+    border-radius: 999px;
+    padding: 0.65rem 1.6rem;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: white;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+  }
+  .btn:hover { opacity: 0.85; transform: translateY(-1px); }
+  .btn:active { transform: translateY(0); }
+  .btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--glass-border);
+    color: var(--ink-soft);
+    border-radius: 999px;
+    padding: 0.45rem 1rem;
+    font-family: 'Jost', sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-ghost:hover { border-color: var(--lavender-mid); color: var(--lavender-deep); }
+
+  /* AI RESPONSE */
+  .ai-response {
+    background: linear-gradient(135deg, rgba(201,191,232,0.12), rgba(240,221,232,0.12));
+    border: 1px solid rgba(201,191,232,0.25);
+    border-radius: 12px;
+    padding: 1.2rem;
+    margin-top: 1rem;
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: var(--ink);
+    display: none;
+  }
+  .ai-response.visible { display: block; }
+  .ai-response .response-label {
+    font-family: 'Jost', sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--lavender-deep);
+    margin-bottom: 0.6rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  /* ENTRIES LIST */
+  .entries-list { margin-top: 1.2rem; }
+  .entry-item {
+    background: rgba(255,255,255,0.5);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 1rem 1.2rem;
+    margin-bottom: 0.7rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .entry-item:hover {
+    background: rgba(201,191,232,0.12);
+    border-color: var(--lavender-mid);
+  }
+  .entry-item .entry-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  .entry-item .entry-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    color: var(--ink);
+  }
+  .entry-item .entry-date {
+    font-size: 0.68rem;
+    color: var(--ink-soft);
+    white-space: nowrap;
+    letter-spacing: 0.05em;
+  }
+  .entry-item .entry-preview {
+    font-size: 0.78rem;
+    color: var(--ink-soft);
+    margin-top: 0.3rem;
+    line-height: 1.4;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .tag {
+    display: inline-block;
+    background: rgba(201,191,232,0.25);
+    border-radius: 999px;
+    padding: 0.15rem 0.6rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    color: var(--lavender-deep);
+    margin-right: 0.3rem;
+    margin-top: 0.4rem;
+  }
+
+  /* DIVIDER */
+  .divider {
+    border: none;
+    border-top: 1px solid var(--glass-border);
+    margin: 1.2rem 0;
+  }
+
+  /* GRID 2 COL */
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+  @media (max-width: 500px) { .grid2 { grid-template-columns: 1fr; } }
+
+  /* SECTION HEADER */
+  .section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.2rem;
+  }
+  .section-header h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.6rem;
+    font-weight: 300;
+    color: var(--ink);
+  }
+
+  /* SPINNER */
+  .spinner {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid rgba(201,191,232,0.4);
+    border-top-color: var(--lavender-deep);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 0.4rem;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* CORRESPONDENCES GRID */
+  .corr-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.8rem;
+    margin-top: 1rem;
+  }
+  .corr-card {
+    background: rgba(255,255,255,0.5);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    padding: 0.9rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .corr-card:hover {
+    background: rgba(201,191,232,0.15);
+    transform: translateY(-2px);
+  }
+  .corr-card .corr-icon { font-size: 1.6rem; margin-bottom: 0.4rem; }
+  .corr-card .corr-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.95rem;
+    color: var(--ink);
+  }
+
+  /* DEITY CARDS */
+  .deity-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+  }
+  .deity-card {
+    background: linear-gradient(160deg, rgba(201,191,232,0.18), rgba(240,221,232,0.18));
+    border: 1px solid var(--glass-border);
+    border-radius: 16px;
+    padding: 1.2rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .deity-card:hover { transform: translateY(-3px); border-color: var(--lavender-mid); }
+  .deity-card .deity-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+  .deity-card .deity-name {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.1rem;
+    color: var(--ink);
+  }
+  .deity-card .deity-domain {
+    font-size: 0.68rem;
+    color: var(--ink-soft);
+    letter-spacing: 0.08em;
+    margin-top: 0.2rem;
+  }
+
+  /* DREAM LOG */
+  .dream-symbols {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 0.5rem;
+  }
+  .symbol-tag {
+    background: rgba(240,221,232,0.4);
+    border: 1px solid rgba(240,221,232,0.6);
+    border-radius: 999px;
+    padding: 0.2rem 0.7rem;
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+  }
+
+  /* MODAL */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(58,50,72,0.35);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 1rem;
+    display: none;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--white);
+    border: 1px solid var(--glass-border);
+    border-radius: 20px;
+    padding: 2rem;
+    max-width: 520px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+  }
+  .modal-close {
+    position: absolute;
+    top: 1rem; right: 1rem;
+    background: none; border: none;
+    font-size: 1.2rem;
+    color: var(--ink-soft);
+    cursor: pointer;
+    line-height: 1;
+  }
+  .modal-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--lavender-deep);
+    margin-bottom: 1rem;
+  }
+  .modal-body {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: var(--ink);
+  }
+
+  /* EMPTY STATE */
+  .empty-state {
+    text-align: center;
+    padding: 2.5rem 1rem;
+    color: var(--ink-soft);
+  }
+  .empty-state .empty-icon { font-size: 2rem; margin-bottom: 0.8rem; opacity: 0.5; }
+  .empty-state p { font-size: 0.85rem; line-height: 1.6; }
+
+  /* ROW ACTIONS */
+  .row { display: flex; gap: 0.7rem; align-items: flex-start; flex-wrap: wrap; }
+  .row .btn { flex-shrink: 0; }
+
+  /* FOOTER SIGIL */
+  footer {
+    text-align: center;
+    padding: 2rem;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(107,96,128,0.4);
+  }
+</style>
+</head>
+<body>
+
+<!-- PASSWORD GATE -->
+<div id="passwordGate">
+  <div class="gate-sigil">☽ ✦ ☾</div>
+  <h1 class="gate-title">My <em>Grimoire</em></h1>
+  <p class="gate-sub">Speak the word to enter</p>
+  <div class="gate-box">
+    <label class="gate-label" for="passwordInput">Password</label>
+    <input type="password" id="passwordInput" placeholder="···" onkeydown="if(event.key==='Enter') unlockGrimoire()">
+    <div class="gate-error" id="gateError"></div>
+    <button class="btn" onclick="unlockGrimoire()" style="width:100%">Enter ✦</button>
+    <p class="gate-hint">First time? Your password will be set on entry.</p>
+  </div>
+</div>
+
+<!-- GRIMOIRE -->
+<div id="grimoire">
+
+<header>
+  <span class="moon-sigil">☽ ✦ ☾</span>
+  <h1>My <em>Grimoire</em></h1>
+  <p class="header-sub">A living book of shadows</p>
+</header>
+
+<!-- MOON BAR -->
+<div class="moon-bar" id="moonBar"></div>
+
+<!-- NAV -->
+<nav>
+  <button class="active" onclick="showSection('spells')">🕯 Spells</button>
+  <button onclick="showSection('moon')">🌙 Moon</button>
+  <button onclick="showSection('correspondences')">🌿 Correspondences</button>
+  <button onclick="showSection('deities')">🏛 Deities</button>
+  <button onclick="showSection('dreams')">🌑 Dreams</button>
+</nav>
+
+<main>
+
+  <!-- ═══════════ SPELLS ═══════════ -->
+  <div id="sec-spells" class="section visible">
+    <div class="section-header">
+      <h2>Spells & Rituals</h2>
+      <button class="btn-ghost" onclick="toggleNewSpell()">+ New</button>
+    </div>
+
+    <div class="card" id="newSpellCard" style="display:none">
+      <p class="card-title">Record a spell</p>
+      <div class="grid2">
+        <div class="field">
+          <label class="field-label">Spell name</label>
+          <input type="text" id="spellName" placeholder="e.g. Clarity candle ritual">
+        </div>
+        <div class="field">
+          <label class="field-label">Intention</label>
+          <input type="text" id="spellIntention" placeholder="e.g. Attract love, release fear">
+        </div>
+      </div>
+      <div class="grid2">
+        <div class="field">
+          <label class="field-label">Moon phase</label>
+          <select id="spellMoon">
+            <option>New Moon</option>
+            <option>Waxing Crescent</option>
+            <option>First Quarter</option>
+            <option>Waxing Gibbous</option>
+            <option>Full Moon</option>
+            <option>Waning Gibbous</option>
+            <option>Last Quarter</option>
+            <option>Waning Crescent</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="field-label">Ingredients / tools</label>
+          <input type="text" id="spellIngredients" placeholder="e.g. Pink candle, rose quartz">
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Instructions & notes</label>
+        <textarea id="spellNotes" placeholder="Describe the ritual steps, words spoken, or anything you wish to remember..."></textarea>
+      </div>
+      <div class="row">
+        <button class="btn" onclick="saveSpell()">Save spell</button>
+        <button class="btn-ghost" onclick="aiSpellAdvice()">✦ Ask the grimoire</button>
+      </div>
+      <div class="ai-response" id="spellAI">
+        <div class="response-label"><span class="spinner" id="spellSpinner" style="display:none"></span>✦ Grimoire speaks</div>
+        <div id="spellAIText"></div>
+      </div>
+    </div>
+
+    <div class="entries-list" id="spellsList"></div>
+  </div>
+
+  <!-- ═══════════ MOON ═══════════ -->
+  <div id="sec-moon" class="section">
+    <div class="section-header">
+      <h2>Moon Journal</h2>
+    </div>
+    <div class="card">
+      <p class="card-title">Current cycle intention</p>
+      <div class="field">
+        <label class="field-label">Set your intention for this moon</label>
+        <textarea id="moonIntention" placeholder="What are you calling in? What are you releasing?"></textarea>
+      </div>
+      <div class="row">
+        <button class="btn" onclick="saveMoonIntention()">Save</button>
+        <button class="btn-ghost" onclick="aiMoonGuidance()">✦ Moon guidance</button>
+      </div>
+      <div class="ai-response" id="moonAI">
+        <div class="response-label"><span class="spinner" id="moonSpinner" style="display:none"></span>✦ Grimoire speaks</div>
+        <div id="moonAIText"></div>
+      </div>
+    </div>
+    <div class="card">
+      <p class="card-title">Past intentions</p>
+      <div id="moonList">
+        <div class="empty-state"><div class="empty-icon">🌙</div><p>Your moon cycle entries will appear here.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ CORRESPONDENCES ═══════════ -->
+  <div id="sec-correspondences" class="section">
+    <div class="section-header">
+      <h2>Correspondences</h2>
+    </div>
+    <div class="card">
+      <p class="card-title">Look up an herb, crystal, or element</p>
+      <div class="row">
+        <input type="text" id="corrQuery" placeholder="e.g. lavender, obsidian, water..." style="flex:1">
+        <button class="btn" onclick="lookupCorrespondence()">✦ Look up</button>
+      </div>
+      <div class="ai-response" id="corrAI">
+        <div class="response-label"><span class="spinner" id="corrSpinner" style="display:none"></span>✦ Grimoire speaks</div>
+        <div id="corrAIText"></div>
+      </div>
+    </div>
+    <p class="card-title" style="margin: 0.5rem 0 0.8rem; padding: 0 0.2rem;">Quick reference</p>
+    <div class="corr-grid" id="corrGrid"></div>
+  </div>
+
+  <!-- ═══════════ DEITIES ═══════════ -->
+  <div id="sec-deities" class="section">
+    <div class="section-header">
+      <h2>Deity Work</h2>
+    </div>
+    <p style="font-size:0.8rem; color:var(--ink-soft); margin-bottom:1.2rem; line-height:1.5;">Your altar pantheon. Tap a deity to channel their wisdom.</p>
+    <div class="deity-grid" id="deityGrid"></div>
+    <div class="card">
+      <p class="card-title">Ask your deity</p>
+      <div class="field">
+        <label class="field-label">Choose deity</label>
+        <select id="deitySelect"></select>
+      </div>
+      <div class="field">
+        <label class="field-label">Your question or prayer</label>
+        <textarea id="deityQuestion" placeholder="What would you like to ask or offer?"></textarea>
+      </div>
+      <button class="btn" onclick="askDeity()">✦ Channel</button>
+      <div class="ai-response" id="deityAI">
+        <div class="response-label"><span class="spinner" id="deitySpinner" style="display:none"></span>✦ Grimoire speaks</div>
+        <div id="deityAIText"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════ DREAMS ═══════════ -->
+  <div id="sec-dreams" class="section">
+    <div class="section-header">
+      <h2>Dream Journal</h2>
+      <button class="btn-ghost" onclick="toggleNewDream()">+ New</button>
+    </div>
+
+    <div class="card" id="newDreamCard" style="display:none">
+      <p class="card-title">Record a dream</p>
+      <div class="grid2">
+        <div class="field">
+          <label class="field-label">Date</label>
+          <input type="text" id="dreamDate" placeholder="e.g. June 11">
+        </div>
+        <div class="field">
+          <label class="field-label">Mood on waking</label>
+          <select id="dreamMood">
+            <option>✨ Luminous</option>
+            <option>🌫 Hazy</option>
+            <option>😰 Anxious</option>
+            <option>🥀 Melancholic</option>
+            <option>🌸 Peaceful</option>
+            <option>🔥 Passionate</option>
+            <option>😱 Frightening</option>
+          </select>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">Dream narrative</label>
+        <textarea id="dreamText" placeholder="Describe what you remember, no matter how fragmented..."></textarea>
+      </div>
+      <div class="field">
+        <label class="field-label">Symbols noticed (comma separated)</label>
+        <input type="text" id="dreamSymbols" placeholder="e.g. water, serpent, mirror, door">
+      </div>
+      <div class="row">
+        <button class="btn" onclick="saveDream()">Save dream</button>
+        <button class="btn-ghost" onclick="interpretDream()">✦ Interpret</button>
+      </div>
+      <div class="ai-response" id="dreamAI">
+        <div class="response-label"><span class="spinner" id="dreamSpinner" style="display:none"></span>✦ Grimoire speaks</div>
+        <div id="dreamAIText"></div>
+      </div>
+    </div>
+
+    <div class="entries-list" id="dreamsList"></div>
+  </div>
+
+</main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay" onclick="closeModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<div id="syncBar" style="text-align:center;font-size:0.65rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-soft);padding:0.4rem;min-height:1.4rem;"></div>
+<footer>✦ &nbsp; crafted with intention &nbsp; ✦</footer>
+
+</div> <!-- /grimoire -->
+
+<script>
+// ── JSONBIN CONFIG ─────────────────────────────────────
+const BIN_ID  = '6a2b665bda38895dfeb1ff47';
+const API_KEY = '$2a$10$zwwxE2lkBARs7jCvjZwPleen5c58lRVbMM7MZt/fNd5xqXCIp0AlC';
+const BIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+
+// ── STATE ──────────────────────────────────────────────
+const state = { spells: [], moonEntries: [], dreams: [] };
+
+function setSyncBar(msg, color) {
+  let bar = document.getElementById('syncBar');
+  if (!bar) return;
+  bar.textContent = msg;
+  bar.style.color = color || 'var(--ink-soft)';
+}
+
+async function loadFromBin() {
+  setSyncBar('✦ loading your grimoire…');
+  try {
+    const res = await fetch(BIN_URL + '/latest', {
+      headers: { 'X-Master-Key': API_KEY }
+    });
+    const json = await res.json();
+    const rec = json.record || {};
+    state.spells      = rec.spells      || [];
+    state.moonEntries = rec.moonEntries || [];
+    state.dreams      = rec.dreams      || [];
+    setSyncBar('');
+  } catch(e) {
+    setSyncBar('⚠ could not load data', '#b8758a');
+  }
+  renderSpells();
+  renderMoon();
+  renderDreams();
+}
+
+async function saveToBin() {
+  setSyncBar('✦ saving…', 'var(--gold)');
+  try {
+    await fetch(BIN_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+      body: JSON.stringify({ spells: state.spells, moonEntries: state.moonEntries, dreams: state.dreams })
+    });
+    setSyncBar('✦ saved', 'var(--lavender-deep)');
+    setTimeout(() => setSyncBar(''), 2000);
+  } catch(e) {
+    setSyncBar('⚠ save failed — try again', '#b8758a');
+  }
+}
+
+function save(key, arr) {
+  state[key === 'moon' ? 'moonEntries' : key] = arr;
+  saveToBin();
+}
+
+// ── MOON PHASES ────────────────────────────────────────
+const moonPhases = [
+  { glyph: '🌑', label: 'New' },
+  { glyph: '🌒', label: 'Wax. Cres.' },
+  { glyph: '🌓', label: '1st Qtr' },
+  { glyph: '🌔', label: 'Wax. Gib.' },
+  { glyph: '🌕', label: 'Full' },
+  { glyph: '🌖', label: 'Wan. Gib.' },
+  { glyph: '🌗', label: 'Last Qtr' },
+  { glyph: '🌘', label: 'Wan. Cres.' },
+];
+let activeMoon = 4;
+function buildMoonBar() {
+  const bar = document.getElementById('moonBar');
+  bar.innerHTML = moonPhases.map((p, i) => `
+    <div class="moon-phase ${i === activeMoon ? 'active' : ''}" onclick="setMoon(${i})">
+      <span class="glyph">${p.glyph}</span>
+      <span class="label">${p.label}</span>
+    </div>`).join('');
+}
+function setMoon(i) {
+  activeMoon = i;
+  buildMoonBar();
+  if (document.getElementById('spellMoon'))
+    document.getElementById('spellMoon').selectedIndex = i;
+}
+buildMoonBar();
+
+// ── NAV ────────────────────────────────────────────────
+function showSection(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('visible'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('visible');
+  event.target.classList.add('active');
+}
+
+// ── TOGGLE FORMS ──────────────────────────────────────
+function toggleNewSpell() {
+  const c = document.getElementById('newSpellCard');
+  c.style.display = c.style.display === 'none' ? 'block' : 'none';
+}
+function toggleNewDream() {
+  const c = document.getElementById('newDreamCard');
+  c.style.display = c.style.display === 'none' ? 'block' : 'none';
+}
+
+// ── ANTHROPIC CALL ────────────────────────────────────
+async function callClaude(prompt, displayId, spinnerId) {
+  const box = document.getElementById(displayId.replace('Text',''));
+  const text = document.getElementById(displayId);
+  const spin = document.getElementById(spinnerId);
+  box.classList.add('visible');
+  spin.style.display = 'inline-block';
+  text.textContent = '';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        system: `You are the voice of a soft, ethereal digital grimoire — wise, poetic, and deeply knowledgeable in witchcraft, mythology, herbalism, dream symbolism, and lunar magic. Respond in beautiful, flowing prose with mystical insight. Be specific and practical while remaining evocative. Keep responses to 3–5 sentences unless more depth is truly needed. Never use bullet points.`,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await res.json();
+    text.textContent = data.content?.map(c => c.text || '').join('') || 'The grimoire is silent for now.';
+  } catch(e) {
+    text.textContent = 'The veil is thick tonight — please try again.';
+  } finally {
+    spin.style.display = 'none';
+  }
+}
+
+// ── SPELLS ────────────────────────────────────────────
+function saveSpell() {
+  const spell = {
+    id: Date.now(),
+    name: document.getElementById('spellName').value || 'Unnamed spell',
+    intention: document.getElementById('spellIntention').value,
+    moon: document.getElementById('spellMoon').value,
+    ingredients: document.getElementById('spellIngredients').value,
+    notes: document.getElementById('spellNotes').value,
+    date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  };
+  state.spells.unshift(spell);
+  save('spells', state.spells);
+  renderSpells();
+  document.getElementById('newSpellCard').style.display = 'none';
+  ['spellName','spellIntention','spellIngredients','spellNotes'].forEach(id => document.getElementById(id).value = '');
+}
+function aiSpellAdvice() {
+  const name = document.getElementById('spellName').value;
+  const intention = document.getElementById('spellIntention').value;
+  const moon = document.getElementById('spellMoon').value;
+  const ingredients = document.getElementById('spellIngredients').value;
+  const prompt = `I am crafting a spell called "${name || 'unnamed'}" with the intention to ${intention || 'manifest my will'}, during the ${moon}, using ${ingredients || 'what I have at hand'}. Offer me poetic guidance, any correspondences I might add, and words of power for this working.`;
+  callClaude(prompt, 'spellAIText', 'spellSpinner');
+}
+function renderSpells() {
+  const list = document.getElementById('spellsList');
+  if (!state.spells.length) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">🕯</div><p>Your spells will be recorded here.<br>Each casting, remembered.</p></div>';
+    return;
+  }
+  list.innerHTML = state.spells.map(s => `
+    <div class="entry-item" onclick="openSpell(${s.id})">
+      <div class="entry-top">
+        <span class="entry-name">${s.name}</span>
+        <span class="entry-date">${s.date}</span>
+      </div>
+      <div class="entry-preview">${s.notes || s.intention || ''}</div>
+      <span class="tag">${s.moon}</span>
+      ${s.intention ? `<span class="tag">${s.intention}</span>` : ''}
+    </div>`).join('');
+}
+function openSpell(id) {
+  const s = state.spells.find(x => x.id === id);
+  if (!s) return;
+  document.getElementById('modalTitle').textContent = s.name;
+  document.getElementById('modalBody').innerHTML = `
+    <p><strong style="font-family:Jost;font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-soft)">Intention</strong><br>${s.intention || '—'}</p>
+    <hr style="border:none;border-top:1px solid var(--glass-border);margin:0.8rem 0">
+    <p><strong style="font-family:Jost;font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-soft)">Moon Phase</strong><br>${s.moon}</p>
+    <hr style="border:none;border-top:1px solid var(--glass-border);margin:0.8rem 0">
+    <p><strong style="font-family:Jost;font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-soft)">Ingredients</strong><br>${s.ingredients || '—'}</p>
+    <hr style="border:none;border-top:1px solid var(--glass-border);margin:0.8rem 0">
+    <p><strong style="font-family:Jost;font-size:0.7rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-soft)">Notes</strong><br>${s.notes || '—'}</p>
+    <p style="margin-top:1rem;font-size:0.72rem;color:var(--ink-soft);font-family:Jost">${s.date}</p>`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+// ── MOON ──────────────────────────────────────────────
+function saveMoonIntention() {
+  const text = document.getElementById('moonIntention').value;
+  if (!text.trim()) return;
+  const entry = {
+    id: Date.now(),
+    text,
+    phase: moonPhases[activeMoon].label,
+    date: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
+  };
+  state.moonEntries.unshift(entry);
+  save('moon', state.moonEntries);
+  renderMoon();
+  document.getElementById('moonIntention').value = '';
+}
+function aiMoonGuidance() {
+  const intention = document.getElementById('moonIntention').value;
+  const phase = moonPhases[activeMoon].label;
+  const prompt = `I am working with the ${moonPhases[activeMoon].glyph} ${phase} moon. My intention is: "${intention || 'to align with the lunar current'}". Offer me specific guidance for this moon phase — what energy to work with, what to release or call in, and a simple ritual act I can perform tonight.`;
+  callClaude(prompt, 'moonAIText', 'moonSpinner');
+}
+function renderMoon() {
+  const list = document.getElementById('moonList');
+  if (!state.moonEntries.length) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">🌙</div><p>Your moon cycle entries will appear here.</p></div>';
+    return;
+  }
+  list.innerHTML = state.moonEntries.map(e => `
+    <div class="entry-item">
+      <div class="entry-top">
+        <span class="entry-name">${e.phase} Moon</span>
+        <span class="entry-date">${e.date}</span>
+      </div>
+      <div class="entry-preview">${e.text}</div>
+    </div>`).join('');
+}
+
+// ── CORRESPONDENCES ───────────────────────────────────
+const quickCorr = [
+  { icon: '🌹', name: 'Rose' },
+  { icon: '💜', name: 'Amethyst' },
+  { icon: '🌙', name: 'Moonstone' },
+  { icon: '🌿', name: 'Mugwort' },
+  { icon: '🔮', name: 'Obsidian' },
+  { icon: '🌸', name: 'Lavender' },
+  { icon: '✨', name: 'Clear Quartz' },
+  { icon: '🌊', name: 'Water' },
+  { icon: '🔥', name: 'Fire' },
+  { icon: '🍃', name: 'Rosemary' },
+  { icon: '🌑', name: 'Black Salt' },
+  { icon: '🌺', name: 'Hibiscus' },
+];
+function buildCorrGrid() {
+  document.getElementById('corrGrid').innerHTML = quickCorr.map(c => `
+    <div class="corr-card" onclick="quickLookup('${c.name}')">
+      <div class="corr-icon">${c.icon}</div>
+      <div class="corr-name">${c.name}</div>
+    </div>`).join('');
+}
+function quickLookup(name) {
+  document.getElementById('corrQuery').value = name;
+  lookupCorrespondence();
+}
+function lookupCorrespondence() {
+  const q = document.getElementById('corrQuery').value;
+  if (!q.trim()) return;
+  const prompt = `Tell me the magical correspondences of ${q} — its planetary ruler, element, associated deities, magical uses, the intentions it serves, and any traditional folk uses in ritual. Weave it together in flowing, poetic prose.`;
+  callClaude(prompt, 'corrAIText', 'corrSpinner');
+}
+buildCorrGrid();
+
+// ── DEITIES ───────────────────────────────────────────
+const deities = [
+  { icon: '🌹', name: 'Aphrodite', domain: 'Love · Beauty · Desire', prompt: 'You are Aphrodite, goddess of love, beauty, and desire. Speak in her voice — warm, magnetic, occasionally playful, always seductive in your wisdom.' },
+  { icon: '🔮', name: 'Hecate', domain: 'Magic · Crossroads · Night', prompt: 'You are Hecate, goddess of magic, crossroads, and the liminal. Speak in her voice — ancient, cryptic, deeply knowing, revealing truth at the threshold.' },
+  { icon: '🌸', name: 'Persephone', domain: 'Transformation · Underworld', prompt: 'You are Persephone, queen of the underworld and goddess of spring. Speak in her voice — gentle yet sovereign, understanding both light and shadow, the beauty in change.' },
+  { icon: '🌿', name: 'Demeter', domain: 'Earth · Abundance · Cycles', prompt: 'You are Demeter, goddess of harvest and earth. Speak in her voice — warm, patient, deeply connected to cycles and growth, protective and nourishing.' },
+  { icon: '🦉', name: 'Athena', domain: 'Wisdom · Strategy · Craft', prompt: 'You are Athena, goddess of wisdom and strategy. Speak in her voice — clear, precise, deeply intelligent, offering counsel that cuts to truth.' },
+  { icon: '🌙', name: 'Artemis', domain: 'Moon · Hunt · Independence', prompt: 'You are Artemis, goddess of the moon and hunt. Speak in her voice — fierce, free, untamed, deeply protective, with no tolerance for what limits the spirit.' },
+];
+function buildDeities() {
+  document.getElementById('deityGrid').innerHTML = deities.map((d, i) => `
+    <div class="deity-card" onclick="selectDeity(${i})">
+      <div class="deity-icon">${d.icon}</div>
+      <div class="deity-name">${d.name}</div>
+      <div class="deity-domain">${d.domain}</div>
+    </div>`).join('');
+  const sel = document.getElementById('deitySelect');
+  sel.innerHTML = deities.map((d, i) => `<option value="${i}">${d.icon} ${d.name}</option>`).join('');
+}
+function selectDeity(i) {
+  document.getElementById('deitySelect').selectedIndex = i;
+  document.getElementById('deityQuestion').focus();
+}
+async function askDeity() {
+  const i = parseInt(document.getElementById('deitySelect').value);
+  const deity = deities[i];
+  const question = document.getElementById('deityQuestion').value;
+  if (!question.trim()) return;
+  const box = document.getElementById('deityAI');
+  const text = document.getElementById('deityAIText');
+  const spin = document.getElementById('deitySpinner');
+  box.classList.add('visible');
+  spin.style.display = 'inline-block';
+  text.textContent = '';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        system: deity.prompt + ' Respond in 3–5 sentences of poetic, mystical prose, speaking directly to the seeker. Never break character.',
+        messages: [{ role: 'user', content: question }]
+      })
+    });
+    const data = await res.json();
+    text.textContent = data.content?.map(c => c.text || '').join('') || '...';
+  } catch(e) {
+    text.textContent = 'The goddess is beyond the veil tonight.';
+  } finally {
+    spin.style.display = 'none';
+  }
+}
+buildDeities();
+
+// ── DREAMS ────────────────────────────────────────────
+function saveDream() {
+  const dream = {
+    id: Date.now(),
+    date: document.getElementById('dreamDate').value || new Date().toLocaleDateString(),
+    mood: document.getElementById('dreamMood').value,
+    text: document.getElementById('dreamText').value,
+    symbols: document.getElementById('dreamSymbols').value.split(',').map(s => s.trim()).filter(Boolean),
+  };
+  state.dreams.unshift(dream);
+  save('dreams', state.dreams);
+  renderDreams();
+  document.getElementById('newDreamCard').style.display = 'none';
+  ['dreamDate','dreamText','dreamSymbols'].forEach(id => document.getElementById(id).value = '');
+}
+function interpretDream() {
+  const text = document.getElementById('dreamText').value;
+  const symbols = document.getElementById('dreamSymbols').value;
+  const mood = document.getElementById('dreamMood').value;
+  const prompt = `I had a dream: "${text || 'a fragmented, elusive vision'}". My mood on waking was ${mood}. The symbols I noticed were: ${symbols || 'unspecified'}. Offer me a mystical and psychological interpretation — what the symbols mean, what the dream may be revealing about my inner world, and what message it carries.`;
+  callClaude(prompt, 'dreamAIText', 'dreamSpinner');
+}
+function renderDreams() {
+  const list = document.getElementById('dreamsList');
+  if (!state.dreams.length) {
+    list.innerHTML = '<div class="empty-state"><div class="empty-icon">🌑</div><p>Your dreams will be recorded here.<br>Each vision, preserved.</p></div>';
+    return;
+  }
+  list.innerHTML = state.dreams.map(d => `
+    <div class="entry-item" onclick="openDream(${d.id})">
+      <div class="entry-top">
+        <span class="entry-name">${d.date} · ${d.mood}</span>
+      </div>
+      <div class="entry-preview">${d.text}</div>
+      <div class="dream-symbols">${d.symbols.map(s => `<span class="symbol-tag">${s}</span>`).join('')}</div>
+    </div>`).join('');
+}
+function openDream(id) {
+  const d = state.dreams.find(x => x.id === id);
+  if (!d) return;
+  document.getElementById('modalTitle').textContent = `${d.date} · ${d.mood}`;
+  document.getElementById('modalBody').innerHTML = `
+    <p>${d.text || '—'}</p>
+    ${d.symbols.length ? `<div style="margin-top:1rem">${d.symbols.map(s => `<span class="tag">${s}</span>`).join('')}</div>` : ''}`;
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+// ── MODAL ─────────────────────────────────────────────
+function closeModal(e) {
+  if (e.target === document.getElementById('modalOverlay')) closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById('modalOverlay').classList.remove('open');
+}
+
+// ── PASSWORD ──────────────────────────────────────────
+const PASS_KEY = 'grimoire_pass_hash';
+
+async function hashPassword(pw) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(pw));
+  return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+async function unlockGrimoire() {
+  const input = document.getElementById('passwordInput');
+  const pw = input.value.trim();
+  if (!pw) { showGateError('The veil requires a word.'); return; }
+
+  const hash = await hashPassword(pw);
+
+  // Try to get stored hash from bin meta
+  let stored = sessionStorage.getItem(PASS_KEY);
+  if (!stored) {
+    try {
+      const res = await fetch(BIN_URL + '/latest', { headers: { 'X-Master-Key': API_KEY } });
+      const json = await res.json();
+      stored = json.record?.passHash || null;
+    } catch(e) { stored = null; }
+  }
+
+  if (!stored) {
+    // First time — set password by saving hash into bin
+    try {
+      const res = await fetch(BIN_URL + '/latest', { headers: { 'X-Master-Key': API_KEY } });
+      const json = await res.json();
+      const rec = json.record || {};
+      rec.passHash = hash;
+      await fetch(BIN_URL, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY },
+        body: JSON.stringify(rec)
+      });
+      sessionStorage.setItem(PASS_KEY, hash);
+      enterGrimoire();
+    } catch(e) { showGateError('Could not reach the grimoire. Try again.'); }
+  } else if (hash === stored) {
+    sessionStorage.setItem(PASS_KEY, hash);
+    enterGrimoire();
+  } else {
+    showGateError('The veil does not yield. Try again.');
+  }
+}
+
+function showGateError(msg) {
+  const input = document.getElementById('passwordInput');
+  const error = document.getElementById('gateError');
+  error.textContent = msg;
+  input.classList.add('error');
+  input.value = '';
+  setTimeout(() => input.classList.remove('error'), 400);
+}
+
+function enterGrimoire() {
+  document.getElementById('passwordGate').classList.add('hidden');
+  document.getElementById('grimoire').style.display = 'block';
+}
+
+// Check if already unlocked this session
+if (sessionStorage.getItem('grimoire_unlocked') === 'yes') {
+  enterGrimoire();
+} else {
+  document.addEventListener('grimoire_entered', () => sessionStorage.setItem('grimoire_unlocked', 'yes'));
+}
+
+const _origEnter = enterGrimoire;
+window.enterGrimoire = function() {
+  _origEnter();
+  document.dispatchEvent(new Event('grimoire_entered'));
+};
+
+// Load everything from JSONBin on startup
+loadFromBin();
+</script>
+</body>
+</html>
